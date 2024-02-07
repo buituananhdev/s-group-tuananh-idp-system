@@ -10,8 +10,8 @@ export class User {
     password: string;
     @Column({ type: "text" })
     fullname: string;
-    @Column({ type: 'date', default: () => 'CURRENT_TIMESTAMP' })
+    @Column({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
     createdAt: Date;
-    @Column({ type: 'date', nullable: true, default: null })
+    @Column({ type: 'timestamptz', nullable: true, default: null })
     updatedAt: Date;
 }
