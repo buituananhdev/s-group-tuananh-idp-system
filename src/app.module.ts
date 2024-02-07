@@ -5,7 +5,6 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
-import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -24,7 +23,7 @@ import { User } from './users/entities/user.entity';
           entities: [join(process.cwd(), 'dist/**/*.entity.js')],
           synchronize: true
       })
-    })
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
