@@ -5,10 +5,12 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
     UsersModule,
+    RolesModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
         imports: [ConfigModule],
