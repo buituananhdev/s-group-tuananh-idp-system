@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Permission } from "src/permissions/entities/permission.entity";
+import { Role } from "src/roles/entities/role.entity";
+import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "users" })
 export class User {
@@ -14,4 +16,8 @@ export class User {
     createdAt: Date;
     @Column({ type: 'timestamptz', nullable: true, default: null })
     updatedAt: Date;
+
+    @ManyToMany(type => Role)
+    @JoinTable()
+    roles: Role[];
 }

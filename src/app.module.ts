@@ -6,11 +6,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { RolesModule } from './roles/roles.module';
+import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
     UsersModule,
     RolesModule,
+    PermissionsModule,
     ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
         imports: [ConfigModule],
