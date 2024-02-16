@@ -7,13 +7,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
-
+import { AuthenticationModule } from './account-services/authentication/authentication.module';
 @Module({
   imports: [
     UsersModule,
     RolesModule,
     PermissionsModule,
-    ConfigModule.forRoot(),
+    AuthenticationModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
         imports: [ConfigModule],
         inject: [ConfigService],
