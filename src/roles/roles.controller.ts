@@ -3,6 +3,7 @@ import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { AssignRoleDto } from './dto/assign-role.dto';
 
 @ApiTags('Roles')
 @Controller('roles')
@@ -32,5 +33,10 @@ export class RolesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.rolesService.remove(+id);
+  }
+
+  @Post('assign')
+  assignRole(@Body() assignRoleDto: AssignRoleDto) {
+    return this.rolesService.assignRole(assignRoleDto);
   }
 }

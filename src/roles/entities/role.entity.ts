@@ -17,7 +17,12 @@ export class Role {
     @Column({ type: 'timestamptz', nullable: true, default: null })
     updatedAt: Date;
 
-    @ManyToMany(type => Permission)
-    @JoinTable()
+    @ManyToMany(() => Permission, (permission) => permission.roles, { cascade: true, eager: true })
+    @JoinTable({
+        name: "role_permissions",
+        joinColumn: { name: "role_id", referencedColumnName: "id" },
+        inverseJoinColumn: { name: "permission_id", referencedColumnName: "id" }
+    })
     permissions: Permission[];
+    users: any;
 }

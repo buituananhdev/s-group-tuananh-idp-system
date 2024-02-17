@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req, SetMetadata } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dto/login.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { LocalGuard } from './guards/local.guard';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { Request } from 'express';
+import { PermissionGuard } from './guards/permissions.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -18,7 +19,8 @@ export class AuthenticationController {
   }
 
   @Get('status')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionGuard)
+  @SetMetadata('permissions', ['read:status'])
   status(@Req() req: Request) {
     console.log("Inside status", req.user);
     return req.user;

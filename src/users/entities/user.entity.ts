@@ -1,4 +1,3 @@
-import { Permission } from "src/permissions/entities/permission.entity";
 import { Role } from "src/roles/entities/role.entity";
 import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn } from "typeorm";
 
@@ -17,7 +16,11 @@ export class User {
     @Column({ type: 'timestamptz', nullable: true, default: null })
     updatedAt: Date;
 
-    @ManyToMany(type => Role)
-    @JoinTable()
-    roles: Role[];
+    @ManyToMany(() => Role, (role) => role.users)
+    @JoinTable({
+        name: "user_roles",
+        joinColumn: { name: "user_id", referencedColumnName: "id" },
+        inverseJoinColumn: { name: "role_id", referencedColumnName: "id" }
+    })
+    roles?: Role[];
 }
