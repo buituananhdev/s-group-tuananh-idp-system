@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { Role } from 'src/roles/entities/role.entity';
 
 @Injectable()
 export class UsersService {
@@ -34,6 +35,12 @@ export class UsersService {
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.findOneOrFail({ where: { id } });
     this.userRepository.merge(user, updateUserDto);
+    return await this.userRepository.save(user);
+  }
+
+  async updateRoles(id: number, roles: Role[]): Promise<User> {
+    const user = await this.userRepository.findOneOrFail({ where: { id } });
+    this.userRepository.merge(user, { roles });
     return await this.userRepository.save(user);
   }
   

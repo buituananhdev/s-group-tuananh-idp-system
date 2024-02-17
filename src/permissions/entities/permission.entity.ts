@@ -12,4 +12,5 @@ export class Permission {
     createdAt: Date;
     @Column({ type: 'timestamptz', nullable: true, default: null })
     updatedAt: Date;
+    roles: any;
 }
