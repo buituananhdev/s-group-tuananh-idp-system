@@ -14,12 +14,11 @@ export class AuthenticationService {
 
 	async login(loginDto: LoginDto): Promise<any> {
 		const user = await this.validateUser(loginDto.username, loginDto.password);
-		console.log('user', user.roles);
 		const payload: AuthPayload = { 
 			name: user.id,
 			email: user.username,
 			id: user.id,
-			roles: user.roles
+			roles: user.roles.map(role => role.name)
 		};
 		return {
 			token: this.jwtService.sign(payload),

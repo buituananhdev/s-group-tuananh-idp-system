@@ -20,7 +20,7 @@ export class AuthenticationController {
 
   @Get('status')
   @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['read:status'])
+  @SetMetadata('permissions', ['read:users'])
   status(@Req() req: Request) {
     console.log("Inside status", req.user);
     return req.user;

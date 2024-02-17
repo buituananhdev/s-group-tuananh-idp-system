@@ -28,10 +28,15 @@ export class UsersService {
     return await this.userRepository.find();
   }
 
-  async findOne(id: number): Promise<User> {
-    return await this.userRepository.findOneOrFail({ where: { id } });
+  async findOne(query?: any): Promise<User> {
+    try {
+      const user = await this.userRepository.findOneOrFail(query);
+      return user;
+    } catch (error) {
+      throw new NotFoundException('User not found');
+    }
   }
-  
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.userRepository.findOneOrFail({ where: { id } });
     this.userRepository.merge(user, updateUserDto);
@@ -48,7 +53,6 @@ export class UsersService {
     const user = await this.userRepository.findOneOrFail({ where: { id } });
     await this.userRepository.remove(user);
   }
-  
 
   async findByUsername(username: string): Promise<User | undefined> {
     return await this.userRepository.findOne({ where: { username } });
