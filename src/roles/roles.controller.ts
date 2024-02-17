@@ -22,7 +22,7 @@ export class RolesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.rolesService.findOne(+id);
+    return this.rolesService.findOne({ where: { id } });
   }
 
   @Patch(':id')
@@ -38,5 +38,10 @@ export class RolesController {
   @Post('assign')
   assignRole(@Body() assignRoleDto: AssignRoleDto) {
     return this.rolesService.assignRole(assignRoleDto);
+  }
+
+  @Get('users/:id')
+  getUsers(@Param('id') id: string) {
+    return this.rolesService.getRolesByUserId(+id);
   }
 }

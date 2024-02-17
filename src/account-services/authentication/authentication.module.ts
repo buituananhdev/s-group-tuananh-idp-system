@@ -10,17 +10,27 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { ConfigModule } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { PermissionsModule } from "../../permissions/permissions.module"
+import { Permission } from 'src/permissions/entities/permission.entity';
+import { PermissionsService } from 'src/permissions/permissions.service';
+import { Role } from 'src/roles/entities/role.entity';
+import { RolesModule } from 'src/roles/roles.module';
+import { RolesService } from 'src/roles/roles.service';
 @Module({
     imports: [
       ConfigModule.forRoot({ isGlobal: true }),
-      TypeOrmModule.forFeature([User]), 
+      TypeOrmModule.forFeature([User]),
+      TypeOrmModule.forFeature([Role]),
+      TypeOrmModule.forFeature([Permission]),
       UsersModule, 
-      PassportModule, 
+      PassportModule,
+      RolesModule,
+      PermissionsModule,
       JwtModule.register({
     secret: process.env.JWT_SECRET,
     signOptions: { expiresIn: process.env.JWT_EXPIRATION },
   })],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService, LocalStrategy, UsersService, JwtStrategy],
+  providers: [AuthenticationService, LocalStrategy, UsersService, JwtStrategy, PermissionsService, RolesService],
 })
 export class AuthenticationModule {}
