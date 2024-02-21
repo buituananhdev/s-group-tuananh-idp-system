@@ -60,15 +60,19 @@ export class PermissionsService {
 
   async getPermissionByRolesName(roles: string[]) {
     const permissions = [];
-  
+
     for (const roleName of roles) {
+      /**
+       * Please get all the related role once using find method, avoid query each time iterating:
+       * this.roleService.find({ where: { name: In(roles) }, relations: ['permissions'] });
+       */
       const role = await this.roleService.findOne({ where: { name: roleName }, relations: ['permissions'] });
-  
+
       if (role) {
         permissions.push(...role.permissions);
       }
     }
-  
+
     return permissions.map((permission) => permission.name);
-  }  
+  }
 }

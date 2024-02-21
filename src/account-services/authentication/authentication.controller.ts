@@ -14,6 +14,7 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 export class AuthenticationController {
   constructor(
     private readonly authenticationService: AuthenticationService,
+    // Should not contains userService business here, this should be encapsulate in authenticationService
     private readonly usersService: UsersService
     ) {}
 
@@ -25,6 +26,12 @@ export class AuthenticationController {
 
   @Post('/register')
   register(@Body() createUserDto: CreateUserDto) {
+    /**
+     * Why register create user directly? No validation for registering process?
+     * Use case should be:
+     * - validate username, email, password
+     * - send to user service for user creation
+     */
     return this.usersService.create(createUserDto);
   }
 

@@ -18,11 +18,12 @@ import { RolesModule } from 'src/roles/roles.module';
 import { RolesService } from 'src/roles/roles.service';
 @Module({
     imports: [
+      // Remove this line, as it is registered as global
       ConfigModule.forRoot({ isGlobal: true }),
       TypeOrmModule.forFeature([User]),
       TypeOrmModule.forFeature([Role]),
       TypeOrmModule.forFeature([Permission]),
-      UsersModule, 
+      UsersModule,
       PassportModule,
       RolesModule,
       PermissionsModule,

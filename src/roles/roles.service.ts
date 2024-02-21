@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { UsersService } from 'src/users/users.service';
 import { Permission } from 'src/permissions/entities/permission.entity';
+// Spacing
 @Injectable()
 export class RolesService {
 	constructor(
@@ -14,6 +15,7 @@ export class RolesService {
 		private readonly roleRepository: Repository<Role>,
 		private readonly userServices: UsersService,
 	) {}
+  // Spacing
 	async create(createRoleDto: CreateRoleDto) {
 		const role = this.roleRepository.create(createRoleDto);
 		return await this.roleRepository.save(role);
@@ -23,6 +25,9 @@ export class RolesService {
 		return await this.roleRepository.find();
 	}
 
+  /**
+   * Throw error then catch and re-throw??
+   */
 	async findOne(query: any) {
     try {
       const role = await this.roleRepository.findOne(query);
@@ -36,6 +41,7 @@ export class RolesService {
 	}
 
 	async update(id: number, updateRoleDto: UpdateRoleDto) {
+    // Duplicate code of get role by id encapsulate with the business error code
 		const role = await this.roleRepository.findOne({
 			where: { id },
 		});
@@ -50,6 +56,7 @@ export class RolesService {
   async updatePermissions(id: number, permissions: Permission[]) {
 		const role = await this.roleRepository.findOneOrFail({ where: { id } });
     this.roleRepository.merge(role, { permissions });
+    // Should distinguish between save and update and insert
     return await this.roleRepository.save(role);
 	}
 
@@ -65,13 +72,16 @@ export class RolesService {
 
 	async assignRole(assignRoleDto: AssignRoleDto) {
 		const { userId, roles } = assignRoleDto;
+    // What if no user found?
 		const user = await this.userServices.findOne({ where: { id: userId } });
-		const assignedRoles = await this.roleRepository.findByIds(roles);
+		// Assign direct instead: user.roles = await this.roleRepository.findByIds(roles)
+    const assignedRoles = await this.roleRepository.findByIds(roles);
 		user.roles = assignedRoles;
 		await this.userServices.updateRoles(user.id, user.roles);
 		return user;
 	}
 
+  // Move to user service as mentioned in the comment
 	async getRolesByUserId(userId: number): Promise<Role[]> {
 		const user = await this.userServices.findOne({
 			where: { id: userId },

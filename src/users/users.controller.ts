@@ -11,10 +11,26 @@ import { PermissionGuard } from 'src/account-services/authentication/guards/perm
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  /**
+   * Extract JwtAuthGuard + @ApiBearerAuth('JWT-auth') into another decorator for reusable purpose
+   * For example: @IsAuthenticated()
+   */
   @UseGuards(JwtAuthGuard, PermissionGuard)
+  /**
+   * Wrap @SetMetadata('permissions', ['create:users']) into another decorator for hiding details of authorization and reusable purpose
+   * For example: @ContainsPermissions('create:users')
+   */
   @SetMetadata('permissions', ['create:users'])
+  /**
+   * Permissions like create:users, read:users should be extracted to constants for reusable and clean code
+   * For example: export enum PERMISSIONS {CREATE_USERS: 'create:users'}
+   */
   @ApiBearerAuth('JWT-auth')
   @Post()
+  /**
+   * Missing data validation from external http request
+   * Please provide validation for CreateUserDto
+   */
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -34,7 +50,7 @@ export class UsersController {
   findOne(@Param('id') id: string) {
     return this.usersService.findOne({ where: { id } });
   }
-  
+
   @UseGuards(JwtAuthGuard, PermissionGuard)
   @SetMetadata('permissions', ['update:users'])
   @ApiBearerAuth('JWT-auth')
