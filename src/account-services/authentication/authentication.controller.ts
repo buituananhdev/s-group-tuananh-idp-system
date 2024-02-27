@@ -21,6 +21,7 @@ export class AuthenticationController {
   @Post('/login')
   @UseGuards(LocalGuard)
   login(@Body() loginDto: LoginDto) {
+    
     return this.authenticationService.login(loginDto);
   }
 

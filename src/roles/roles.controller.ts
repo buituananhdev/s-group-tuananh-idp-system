@@ -1,61 +1,56 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AssignRoleDto } from './dto/assign-role.dto';
-import { PermissionGuard } from 'src/account-services/authentication/guards/permissions.guard';
-import { JwtAuthGuard } from 'src/account-services/authentication/guards/jwt.guard';
+import { Identified, Permission } from 'src/common/decorators/index';
+import { PermissionEnum } from 'src/common/enums/index';
 
 @ApiTags('Roles')
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['create:role'])
-  @ApiBearerAuth('JWT-auth')
+  @Identified
+	@Permission([PermissionEnum.CREATE_ROLES])
   @Post()
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
   }
 
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['read:roles'])
-  @ApiBearerAuth('JWT-auth')
+  @Identified
+	@Permission([PermissionEnum.READ_ROLES])
   @Get()
   findAll() {
     return this.rolesService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['read:roles'])
-  @ApiBearerAuth('JWT-auth')
+  @Identified
+	@Permission([PermissionEnum.READ_ROLES])
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.rolesService.findOne({ where: { id } });
   }
 
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['read:roles'])
-  @ApiBearerAuth('JWT-auth')
+  @Identified
+	@Permission([PermissionEnum.UPDATE_ROLES])
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.rolesService.update(+id, updateRoleDto);
   }
 
+  @Identified
+	@Permission([PermissionEnum.DELETE_ROLES])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.rolesService.remove(+id);
   }
 
+  @Identified
+	@Permission([PermissionEnum.ASSIGN_ROLES])
   @Post('assign')
   assignRole(@Body() assignRoleDto: AssignRoleDto) {
     return this.rolesService.assignRole(assignRoleDto);
-  }
-
-  @Get('users/:id')
-  getUsers(@Param('id') id: string) {
-    return this.rolesService.getRolesByUserId(+id);
   }
 }

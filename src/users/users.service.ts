@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Repository } from 'typeorm';
@@ -6,110 +6,131 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/roles/entities/role.entity';
+import { ConfigService } from '@nestjs/config';
+import { Meta } from 'src/common/types/index';
+import {
+	UserAlreadyExistsException,
+	UserNotFoundException,
+	InternalServerErrorException,
+} from 'src/common/exceptions/index';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-  ) {}
+	constructor(
+		@InjectRepository(User)
+		private readonly userRepository: Repository<User>,
+		private readonly configService: ConfigService,
+	) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    if (await this.userRepository.findOne({ where: { username: createUserDto.username } })) {
-      /**
-       *  Avoid using native Http Exception, use custom exception instead:
-       *  - There can be many duplicate http status code like 400, 422 - hard for handle specific business
-       *  - Instead, custom exception that bound business code and message is better
-       *
-       *  For example:
-       *  throw new UserAlreadyExistsException();
-       *  // export class UserAlreadyExistsException extends NotFoundException {
-       *  //   constructor() {
-       *  //     super('User already exists');
-       *  //     this.code = 'USER_ALREADY_EXISTS'; // This is the target business code
-       *  //   }
-       *  // }
-       */
-      throw new NotFoundException('User already exists');
-    } // Spacing after the if statement for separate code of blocks
+	async create(createUserDto: CreateUserDto): Promise<User> {
+		try {
+			if (await this.findByUsername(createUserDto.username)) {
+				throw new UserAlreadyExistsException();
+			}
 
-    /**
-     * Get this from config - not hard code, by the way
-     * This is rounds not saltOrRounds, please correct it
-     * Prefer using salt with secret key instead of rounds only
-     */
-    const saltOrRounds = 10;
-    const hash = await bcrypt.hash(createUserDto.password, saltOrRounds);
+			const hash = await bcrypt.hash(
+				createUserDto.password,
+				this.configService.get('BCRYPT_ROUND'),
+			);
 
-    // Spacing between different actions
-    const user = this.userRepository.create({ ...createUserDto, password: hash });
-    return await this.userRepository.save(user);
-  }
+			const user = this.userRepository.create({
+				...createUserDto,
+				password: hash,
+			});
+			return await this.userRepository.save(user);
+		} catch (error) {
+			throw new InternalServerErrorException();
+		}
+	}
 
-  /**
-   * Missing pagination for api get user, please update this
-   */
-  async findAll(): Promise<User[]> {
-    return await this.userRepository.find();
-  }
+	async findAll(page = 1, limit = 10): Promise<{ data: User[]; meta: Meta }> {
+		try {
+			const [data, total] = await this.userRepository.findAndCount({
+				skip: (page - 1) * limit,
+				take: limit,
+			});
+			const totalPage = Math.ceil(total / limit);
+			const nextPage = page < totalPage ? page + 1 : null;
 
-  /**
-   * Encapsulate the Query Model into a separate class
-   * - This should not public the generic of typeorm out of the service.
-   * - Service is closed to focus on business domain
-   *
-   * Case 1:
-   * If from role service, you are targeting to getRolesByUserId,
-   * you should public this method from userService#getRolesByUserId instead
-   * async getRolesByUserId(userId: number): Promise<Role[]> {
-   *    const user = await this.userServices.findOne({
-   *      where: { id: userId },
-   *      relations: ['roles'],
-   *    });
-   *
-   *    return user.roles;
-   *  }
-   *
-   *  Case 2:
-   *  You are targeting get user detail which is business purpose,
-   *  you should public this method from userService#findDetailById to provide nesseary detail
-   *  to api get user detail
-   */
-  async findOne(query?: any): Promise<User> {
-    try {
-      const user = await this.userRepository.findOneOrFail(query);
-      return user;
-    } catch (error) {
-      throw new NotFoundException('User not found');
-    }
-  }
+			return {
+				data,
+				meta: {
+					currentPage: page,
+					nextPage,
+					totalPage,
+				},
+			};
+		} catch (error) {
+			throw new InternalServerErrorException();
+		}
+	}
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    // What if it failed, how should client handle this error?
-    const user = await this.userRepository.findOneOrFail({ where: { id } });
+	async findById(id: number): Promise<User> {
+		try {
+			const user = await this.userRepository.findOneOrFail({ where: { id } });
+			return user;
+		} catch (error) {
+			throw new UserNotFoundException();
+		}
+	}
 
-    /**
-     * What if merged and save failed, what is the status client need to handle?
-     * Are you allowing to modify password, username, createdAt, ...?
-     * Not much information should be modify, please update this
-     */
-    this.userRepository.merge(user, updateUserDto);
-    return await this.userRepository.save(user);
-  }
+	async findByUsername(username: string): Promise<User> {
+		try {
+			const user = await this.userRepository.findOneOrFail({
+				where: { username: username },
+			});
+			if (!user) {
+				throw new UserNotFoundException();
+			}
+			return user;
+		} catch (error) {
+			throw new InternalServerErrorException();
+		}
+	}
 
-  async updateRoles(id: number, roles: Role[]): Promise<User> {
-    const user = await this.userRepository.findOneOrFail({ where: { id } });
-    this.userRepository.merge(user, { roles });
-    return await this.userRepository.save(user);
-  }
+	async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+		try {
+			await this.userRepository.update(id, {
+				username: updateUserDto.username,
+				fullname: updateUserDto.fullname,
+			});
+			const user = await this.findById(id);
+			return user;
+		} catch (error) {
+			throw new InternalServerErrorException();
+		}
+	}
 
-  async remove(id: number): Promise<void> {
-    const user = await this.userRepository.findOneOrFail({ where: { id } });
-    // What happens with the related data, should it be removed as well?
-    await this.userRepository.remove(user);
-  }
+	async updateRoles(id: number, roles: Role[]): Promise<User> {
+		try {
+			const user = await this.userRepository.findOneOrFail({ where: { id } });
+			this.userRepository.merge(user, { roles });
+			return await this.userRepository.save(user);
+		} catch (error) {
+			throw new InternalServerErrorException();
+		}
+	}
 
-  async findByUsername(username: string): Promise<User | undefined> {
-    return await this.userRepository.findOne({ where: { username } });
-  }
+	async remove(id: number): Promise<void> {
+		try {
+			const user = await this.userRepository.findOneOrFail({ where: { id } });
+			// What happens with the related data, should it be removed as well?
+			await this.userRepository.remove(user);
+		} catch (error) {
+			throw new InternalServerErrorException();
+		}
+	}
+
+	async getRolesByUserId(userId: number): Promise<Role[]> {
+		try {
+			const user = await this.userRepository.findOne({
+				where: { id: userId },
+				relations: ['roles'],
+			});
+
+			return user.roles;
+		} catch (error) {
+			throw new InternalServerErrorException();
+		}
+	}
 }

@@ -23,6 +23,7 @@ export class AuthenticationService {
 			id: user.id,
 			permissions: userPermissions
 		};
+		
 		return this.jwtService.sign(payload);
 	}
 
