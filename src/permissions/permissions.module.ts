@@ -14,11 +14,10 @@ import { User } from 'src/users/entities/user.entity';
   imports: [
     UsersModule,
     RolesModule,
-    TypeOrmModule.forFeature([User]),
-    TypeOrmModule.forFeature([Role]),
     TypeOrmModule.forFeature([Permission])
   ],
-  providers: [PermissionsService, RolesService, UsersService],
+  providers: [PermissionsService],
   controllers: [PermissionsController],
+  exports: [PermissionsService]
 })
 export class PermissionsModule {}

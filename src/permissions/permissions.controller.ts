@@ -4,57 +4,50 @@ import {
 	Param,
 	Delete,
 	Body,
-	Post,
-	UseGuards,
-	SetMetadata,
+	Post
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AssignPermissionDto } from './dto/assign-permission.dto';
 import { createPermissionDto } from './dto/create-permission.dto';
-import { PermissionGuard } from 'src/account-services/authentication/guards/permissions.guard';
-import { JwtAuthGuard } from 'src/account-services/authentication/guards/jwt.guard';
+import { Identified, Permission } from 'src/common/decorators/index';
+import { PermissionEnum } from 'src/common/enums/index';
 
 @ApiTags('Permissions')
 @Controller('permissions')
 export class PermissionsController {
 	constructor(private readonly permissionsService: PermissionsService) {}
 
-	@UseGuards(JwtAuthGuard, PermissionGuard)
-	@SetMetadata('permissions', ['create:permissions'])
-	@ApiBearerAuth('JWT-auth')
+	@Identified
+	@Permission([PermissionEnum.CREATE_PERMISSIONS])
 	@Post()
 	create(@Body() createPermissionDto: createPermissionDto) {
 		return this.permissionsService.create(createPermissionDto);
 	}
 
-	@UseGuards(JwtAuthGuard, PermissionGuard)
-	@SetMetadata('permissions', ['read:permissions'])
-	@ApiBearerAuth('JWT-auth')
+	@Identified
+	@Permission([PermissionEnum.READ_PERMISSIONS])
 	@Get()
 	findAll() {
 		return this.permissionsService.findAll();
 	}
 
-	@UseGuards(JwtAuthGuard, PermissionGuard)
-	@SetMetadata('permissions', ['read:permissions'])
-	@ApiBearerAuth('JWT-auth')
+	@Identified
+	@Permission([PermissionEnum.READ_PERMISSIONS])
 	@Get(':id')
 	findOne(@Param('id') id: string) {
 		return this.permissionsService.findOne(+id);
 	}
 
-	@UseGuards(JwtAuthGuard, PermissionGuard)
-	@SetMetadata('permissions', ['delete:permissions'])
-	@ApiBearerAuth('JWT-auth')
+	@Identified
+	@Permission([PermissionEnum.DELETE_PERMISSIONS])
 	@Delete(':id')
 	remove(@Param('id') id: string) {
 		return this.permissionsService.remove(+id);
 	}
 
-	@UseGuards(JwtAuthGuard, PermissionGuard)
-	@SetMetadata('permissions', ['assign:permissions'])
-	@ApiBearerAuth('JWT-auth')
+	@Identified
+	@Permission([PermissionEnum.ASSIGN_PERMISSIONS])
 	@Post('assign')
 	assignPermission(@Body() assignPermissionDto: AssignPermissionDto) {
 		return this.permissionsService.assignPermission(assignPermissionDto);

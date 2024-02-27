@@ -8,67 +8,68 @@ import { createPermissionDto } from './dto/create-permission.dto';
 
 @Injectable()
 export class PermissionsService {
-  constructor(
-    @InjectRepository(Permission)
-    private readonly userRepository: Repository<Permission>,
-    private readonly roleService: RolesService,
-  ) {}
-  async create(createPermissionDto: createPermissionDto) {
-    const permission = this.userRepository.create(createPermissionDto);
-    return await this.userRepository.save(permission);
-  }
+	constructor(
+		@InjectRepository(Permission)
+		private readonly userRepository: Repository<Permission>,
+		private readonly roleService: RolesService,
+	) {}
+	async create(createPermissionDto: createPermissionDto) {
+		const permission = this.userRepository.create(createPermissionDto);
+		return await this.userRepository.save(permission);
+	}
 
-  async findAll() {
-    return await this.userRepository.find();
-  }
+	async findAll() {
+		return await this.userRepository.find();
+	}
 
-  async findOne(id: number) {
-    return await this.userRepository.findOne({
-      where: { id },
-    });
-  }
+	async findOne(id: number) {
+		return await this.userRepository.findOne({
+			where: { id },
+		});
+	}
 
-  async update(id: number, updatePermissionDto: Permission) {
-    const permission = await this.userRepository.findOne({
-      where: { id },
-    });
-    if (!permission) {
-      throw new NotFoundException();
-    }
-    Object.assign(permission, updatePermissionDto);
+	async update(id: number, updatePermissionDto: Permission) {
+		const permission = await this.userRepository.findOne({
+			where: { id },
+		});
+		if (!permission) {
+			throw new NotFoundException();
+		}
+		Object.assign(permission, updatePermissionDto);
 
-    return await this.userRepository.save(permission);
-  }
+		return await this.userRepository.save(permission);
+	}
 
-  async remove(id: number) {
-    const permission = await this.userRepository.findOne({
-      where: { id },
-    });
-    if (!permission) {
-      throw new NotFoundException();
-    }
-    return await this.userRepository.remove(permission);
-  }
+	async remove(id: number) {
+		const permission = await this.userRepository.findOne({
+			where: { id },
+		});
+		if (!permission) {
+			throw new NotFoundException();
+		}
+		return await this.userRepository.remove(permission);
+	}
 
-  async assignPermission(assignPermissionDto: AssignPermissionDto) {
-    const { roleId, permissions } = assignPermissionDto;
-    const role = await this.roleService.findOne({ where: { id: roleId } });
-    const assignedPermissions = await this.userRepository.findByIds(permissions);
-    role.permissions = assignedPermissions;
-    await this.roleService.updatePermissions(role.id, role.permissions);
-  }
+	async assignPermission(assignPermissionDto: AssignPermissionDto) {
+		const { roleId, permissions } = assignPermissionDto;
+		const role = await this.roleService.findOne({ where: { id: roleId } });
+		const assignedPermissions = await this.userRepository.findByIds(permissions);
+		role.permissions = assignedPermissions;
+		await this.roleService.updatePermissions(role.id, role.permissions);
+	}
 
-  async getPermissionByRolesName(roles: string[]) {
-    const permissions = [];
-  
-    for (const roleName of roles) {
-      const role = await this.roleService.findOne({ where: { name: roleName }, relations: ['permissions'] });
-  
-      if (role) {
-        permissions.push(...role.permissions);
-      }
-    }
-  
-    return permissions.map((permission) => permission.name);
-  }  
+	async getPermissionByRolesName(roles: string[]) {
+		const rolePermissionMap: Record<string, string[]> = {};
+
+		const rolesWithPermissions = await this.roleService.findByRolesNameAndGetRalatedPermission(roles);
+    
+		// Organize the data into a map for easier lookup
+		rolesWithPermissions.forEach((role) => {
+			rolePermissionMap[role.name] = role.permissions.map(
+				(permission) => permission.name,
+			);
+		});
+
+    return roles.flatMap((roleName) => rolePermissionMap[roleName] || []);
+	}
 }

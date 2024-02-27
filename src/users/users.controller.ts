@@ -1,53 +1,63 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, SetMetadata } from '@nestjs/common';
+import {
+	Controller,
+	Get,
+	Post,
+	Body,
+	Patch,
+	Param,
+	Delete,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/account-services/authentication/guards/jwt.guard';
-import { PermissionGuard } from 'src/account-services/authentication/guards/permissions.guard';
+import { Identified, Permission } from 'src/common/decorators/index';
+import { PermissionEnum } from 'src/common/enums/index';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+	constructor(private readonly usersService: UsersService) {}
 
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['create:users'])
-  @ApiBearerAuth('JWT-auth')
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
+	@Identified
+	@Permission([PermissionEnum.CREATE_USERS])
+	@Post()
+	create(@Body() createUserDto: CreateUserDto) {
+		return this.usersService.create(createUserDto);
+	}
 
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['read:users'])
-  @ApiBearerAuth('JWT-auth')
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
+	@Identified
+	@Permission([PermissionEnum.READ_USERS])
+	@Get()
+	findAll(@Param('page') page: number, @Param('limit') limit: number) {
+		return this.usersService.findAll(page, limit);
+	}
 
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['read:users'])
-  @ApiBearerAuth('JWT-auth')
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne({ where: { id } });
-  }
-  
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['update:users'])
-  @ApiBearerAuth('JWT-auth')
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
+	@Identified
+	@Permission([PermissionEnum.READ_USERS])
+	@Get(':id')
+	findOne(@Param('id') id: string) {
+		return this.usersService.findById(+id);
+	}
 
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['delete:users'])
-  @ApiBearerAuth('JWT-auth')
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
+	@Identified
+	@Permission([PermissionEnum.UPDATE_USERS])
+	@Patch(':id')
+	update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+		return this.usersService.update(+id, updateUserDto);
+	}
+
+	@Identified
+	@Permission([PermissionEnum.DELETE_USERS])
+	@Delete(':id')
+	remove(@Param('id') id: string) {
+		return this.usersService.remove(+id);
+	}
+
+	@Identified
+	@Permission([PermissionEnum.READ_USERS])
+	@Get(':id/roles')
+	getRoles(@Param('id') id: string) {
+		return this.usersService.getRolesByUserId(+id);
+	}
 }
