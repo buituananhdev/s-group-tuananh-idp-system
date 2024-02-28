@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Body, UseGuards, Req, SetMetadata } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import { LoginDto } from './dto/login.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { LocalGuard } from './guards/local.guard';
-import { JwtAuthGuard } from './guards/jwt.guard';
 import { Request } from 'express';
+import { Identified, Permission } from 'src/common/decorators/index';
+import { PermissionEnum } from 'src/common/enums';
+import { JwtAuthGuard } from './guards/jwt.guard';
 import { PermissionGuard } from './guards/permissions.guard';
 
 @ApiTags('Authentication')
@@ -20,11 +22,7 @@ export class AuthenticationController {
     return this.authenticationService.login(loginDto);
   }
 
-
   @Get('test')
-  @UseGuards(JwtAuthGuard, PermissionGuard)
-  @SetMetadata('permissions', ['read:users'])
-  @ApiBearerAuth('JWT-auth')
   status(@Req() req: Request) {
     console.log("Inside status", req.user);
     return req.user;
