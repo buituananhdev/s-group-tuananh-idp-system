@@ -4,6 +4,10 @@ import { LoginDto } from './dto/login.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { LocalGuard } from './guards/local.guard';
 import { Request } from 'express';
+import { Identified, Permission } from 'src/common/decorators/index';
+import { PermissionEnum } from 'src/common/enums';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { PermissionGuard } from './guards/permissions.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -18,6 +22,7 @@ export class AuthenticationController {
     return this.authenticationService.login(loginDto);
   }
 
+  @Identified
   @Get('test')
   status(@Req() req: Request) {
     console.log("Inside status", req.user);
