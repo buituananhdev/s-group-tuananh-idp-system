@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CacheModule } from '@nestjs/cache-manager';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
@@ -8,6 +9,7 @@ import { join } from 'path';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { AuthenticationModule } from './account-services/authentication/authentication.module';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
@@ -29,6 +31,15 @@ import { AuthenticationModule } from './account-services/authentication/authenti
           entities: [join(process.cwd(), 'dist/**/*.entity.js')],
           synchronize: true
       })
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        store: redisStore,
+        host: configService.get('REDIS_HOST'),
+        port: configService.get('REDIS_PORT'),
+      }),
     }),
   ],
   controllers: [AppController],
