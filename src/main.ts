@@ -5,10 +5,9 @@ import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // Using ConfigService to centralize the configuration
   const configService = app.get(ConfigService);
 
-  app.setGlobalPrefix(configService.get('API_PREFIX', 'api'));
+  app.setGlobalPrefix(configService.get('API_PREFIX' || 'api/v1'));
 
   const config = new DocumentBuilder()
     .setTitle('IDP System API')
@@ -30,7 +29,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
-  // Using ConfigService to get PORT
-  await app.listen(3000);
+  await app.listen(configService.get('PORT') || 3000);
 }
 bootstrap();
