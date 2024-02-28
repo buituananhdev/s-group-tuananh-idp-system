@@ -39,6 +39,7 @@ import { redisStore } from 'cache-manager-redis-yet';
         store: redisStore,
         host: configService.get('REDIS_HOST'),
         port: configService.get('REDIS_PORT'),
+        ttl: 600 * 1000,
       }),
     }),
   ],

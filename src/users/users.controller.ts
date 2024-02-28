@@ -26,7 +26,7 @@ export class UsersController {
 		return this.usersService.create(createUserDto);
 	}
 
-	@Identified
+	// @Identified
 	@Permission([PermissionEnum.READ_USERS])
 	@Get()
 	findAll(@Param('page') page: number, @Param('limit') limit: number) {

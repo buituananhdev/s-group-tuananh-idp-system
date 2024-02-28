@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,13 +7,16 @@ import { In, Repository } from 'typeorm';
 import { AssignRoleDto } from './dto/assign-role.dto';
 import { UsersService } from 'src/users/users.service';
 import { Permission } from 'src/permissions/entities/permission.entity';
-// Spacing
+import { Cache } from 'cache-manager';
+import { PermissionsService } from 'src/permissions/permissions.service';
+
 @Injectable()
 export class RolesService {
 	constructor(
 		@InjectRepository(Role)
 		private readonly roleRepository: Repository<Role>,
 		private readonly userServices: UsersService,
+		@Inject('CACHE_MANAGER') private cacheManager: Cache
 	) {}
 
 	async create(createRoleDto: CreateRoleDto) {
@@ -72,6 +75,12 @@ export class RolesService {
 		}
 		user.roles = await this.roleRepository.findByIds(roles);
 		await this.userServices.updateRoles(user.id, user.roles);
+
+
+		// update cache
+		if(this.cacheManager.get(userId.toString())) {
+			await this.cacheManager.del(userId.toString());
+		}
 		return user;
 	}
 }
