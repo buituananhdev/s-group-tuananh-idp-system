@@ -9,6 +9,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { PermissionsModule } from "../../permissions/permissions.module"
 import { RolesModule } from 'src/roles/roles.module';
 import { ConfigService } from '@nestjs/config';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
     imports: [
@@ -25,6 +26,7 @@ import { ConfigService } from '@nestjs/config';
       })
     ],
   controllers: [AuthenticationController],
-  providers: [AuthenticationService, LocalStrategy, JwtStrategy],
+  exports: [AuthenticationService],
+  providers: [AuthenticationService, LocalStrategy, JwtStrategy, GoogleStrategy],
 })
 export class AuthenticationModule {}
