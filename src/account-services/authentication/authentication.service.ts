@@ -46,4 +46,8 @@ export class AuthenticationService {
 
 		return user;
 	}
+
+	async validateGoogleUser(email: string, name: string) {
+		
+	}
 }

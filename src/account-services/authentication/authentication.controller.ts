@@ -4,10 +4,8 @@ import { LoginDto } from './dto/login.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { LocalGuard } from './guards/local.guard';
 import { Request } from 'express';
-import { Identified, Permission } from 'src/common/decorators/index';
-import { PermissionEnum } from 'src/common/enums';
-import { JwtAuthGuard } from './guards/jwt.guard';
-import { PermissionGuard } from './guards/permissions.guard';
+import { Identified } from 'src/common/decorators/index';
+import { GoogleAuthGuard } from './guards/google.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -20,6 +18,17 @@ export class AuthenticationController {
   @UseGuards(LocalGuard)
   login(@Body() loginDto: LoginDto) {
     return this.authenticationService.login(loginDto);
+  }
+
+  @Get('/google/login')
+  @UseGuards(GoogleAuthGuard)
+  googleLogin(@Body() loginDto: LoginDto) {
+    return this.authenticationService.login(loginDto);
+  }
+
+  @Get('/google/redirect')
+  @UseGuards(GoogleAuthGuard)
+  googleLoginRedirect(@Req() req: Request) {
   }
 
   @Identified
