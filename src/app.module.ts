@@ -10,6 +10,8 @@ import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { AuthenticationModule } from './account-services/authentication/authentication.module';
 import { redisStore } from 'cache-manager-redis-yet';
+import { Oauth2Module } from './account-services/oauth2/oauth2.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { redisStore } from 'cache-manager-redis-yet';
     RolesModule,
     PermissionsModule,
     AuthenticationModule,
+    Oauth2Module,
+    CommonModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
         imports: [ConfigModule],
@@ -29,6 +33,7 @@ import { redisStore } from 'cache-manager-redis-yet';
           password: configService.get('DB_PASSWORD'),
           database: configService.get('DB_NAME'),
           entities: [join(process.cwd(), 'dist/**/*.entity.js')],
+          autoLoadEntities: true,
           synchronize: true
       })
     }),

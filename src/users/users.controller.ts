@@ -6,6 +6,8 @@ import {
 	Patch,
 	Param,
 	Delete,
+	Query,
+	Headers,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,24 +15,44 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Identified, Permission } from 'src/common/decorators/index';
 import { PermissionEnum } from 'src/common/enums/index';
+import { AuthUser } from 'src/common/decorators/user.decorator';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
 	constructor(private readonly usersService: UsersService) {}
 
+	@Get('seed')
+	seedUsers() {
+		return this.usersService.seedUsers();
+	}
+	
 	@Identified
-	@Permission([PermissionEnum.CREATE_USERS])
+	@Get('me')
+	getMe(@Headers('Authorization') auth: string) {
+		return this.usersService.getMe(auth);
+	}
+
+	// @Identified
+	// @Permission([PermissionEnum.CREATE_USERS])
 	@Post()
 	create(@Body() createUserDto: CreateUserDto) {
 		return this.usersService.create(createUserDto);
 	}
 
 	// @Identified
-	@Permission([PermissionEnum.READ_USERS])
+	// @Permission([PermissionEnum.READ_USERS])
 	@Get()
-	findAll(@Param('page') page: number, @Param('limit') limit: number) {
-		return this.usersService.findAll(page, limit);
+	findAll(
+		@Query('page') page: number = 1,
+        @Query('limit') limit: number = 20,
+        @Query('search') search?: string,
+        @Query('name') exactName?: string,
+        @Query('email') exactEmail?: string,
+        @Query('fromDate') fromDate?: Date,
+        @Query('toDate') toDate?: Date,
+	) {
+		return this.usersService.findAll(page, limit, search, exactName, exactEmail, fromDate, toDate);
 	}
 
 	@Identified

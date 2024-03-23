@@ -1,5 +1,6 @@
+import { OAuth2Client } from "src/account-services/oauth2/entities/oauth2-client";
 import { Role } from "src/roles/entities/role.entity";
-import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, JoinTable, PrimaryGeneratedColumn, OneToMany } from "typeorm";
 
 @Entity({ name: "users" })
 export class User {
@@ -7,6 +8,8 @@ export class User {
     id: number;
     @Column({ unique: true })
     username: string;
+    @Column({ unique: true })
+    email: string;
     @Column({ type: "text" })
     password: string;
     @Column({ type: "text" })
@@ -23,4 +26,7 @@ export class User {
         inverseJoinColumn: { name: "role_id", referencedColumnName: "id" }
     })
     roles?: Role[];
+    
+    @OneToMany(() => OAuth2Client, oauth2Client => oauth2Client.user)
+    oauth2Clients: OAuth2Client[];
 }

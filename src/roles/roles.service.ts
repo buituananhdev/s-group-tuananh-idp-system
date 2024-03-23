@@ -8,7 +8,7 @@ import { AssignRoleDto } from './dto/assign-role.dto';
 import { UsersService } from 'src/users/users.service';
 import { Permission } from 'src/permissions/entities/permission.entity';
 import { Cache } from 'cache-manager';
-import { PermissionsService } from 'src/permissions/permissions.service';
+import { SystemRoles } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class RolesService {
@@ -18,6 +18,17 @@ export class RolesService {
 		private readonly userServices: UsersService,
 		@Inject('CACHE_MANAGER') private cacheManager: Cache
 	) {}
+	
+	async seedRoles() {
+		const superAdminRole = this.roleRepository.create({ name: SystemRoles.SUPER_ADMIN, description: 'Super Admin' });
+		const adminRole = this.roleRepository.create({ name: SystemRoles.ADMIN, description: 'Admin' });
+		const coachingRole = this.roleRepository.create({ name: SystemRoles.COACHING, description: 'COACHING' });
+	
+		await this.roleRepository.save(superAdminRole);
+		await this.roleRepository.save(adminRole);
+		await this.roleRepository.save(coachingRole);
+	}
+	
 
 	async create(createRoleDto: CreateRoleDto) {
 		const role = this.roleRepository.create(createRoleDto);
