@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "typeorm": "npx typeorm-ts-node-commonjs --dataSource ./src/common/config/seeder.config.ts",
+    "typeorm": "ts-node ./node_modules/typeorm/cli",
     "migration:generate": "yarn typeorm -- -d ./src/common/config/migration.config.ts migration:generate ./src/common/migrations/$npm_config_name",
     "migration:create": "yarn typeorm migration:create ./src/common/migrations/$npm_config_name",
     "migration:run": "yarn typeorm migration:run -- -d ./src/common/config/migration.config.ts",
