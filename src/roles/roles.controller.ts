@@ -11,6 +11,16 @@ import { PermissionEnum } from 'src/common/enums/index';
 @Controller('roles')
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
+  
+  @Get()
+  findAll() {
+    return this.rolesService.findAll();
+  }
+  
+  @Get('seed')
+  seedRoles() {
+    return this.rolesService.seedRoles();
+  }
 
   @Identified
 	@Permission([PermissionEnum.CREATE_ROLES])
@@ -19,12 +29,9 @@ export class RolesController {
     return this.rolesService.create(createRoleDto);
   }
 
-  @Identified
-	@Permission([PermissionEnum.READ_ROLES])
-  @Get()
-  findAll() {
-    return this.rolesService.findAll();
-  }
+  // @Identified
+	// @Permission([PermissionEnum.READ_ROLES])
+  
 
   @Identified
 	@Permission([PermissionEnum.READ_ROLES])
@@ -53,4 +60,6 @@ export class RolesController {
   assignRole(@Body() assignRoleDto: AssignRoleDto) {
     return this.rolesService.assignRole(assignRoleDto);
   }
+
+  
 }

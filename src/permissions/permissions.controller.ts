@@ -18,6 +18,11 @@ import { PermissionEnum } from 'src/common/enums/index';
 export class PermissionsController {
 	constructor(private readonly permissionsService: PermissionsService) {}
 
+	@Get('seed')
+	seedPermissions() {
+		return this.permissionsService.seedPermissions();
+	}
+	
 	@Identified
 	@Permission([PermissionEnum.CREATE_PERMISSIONS])
 	@Post()
@@ -52,4 +57,6 @@ export class PermissionsController {
 	assignPermission(@Body() assignPermissionDto: AssignPermissionDto) {
 		return this.permissionsService.assignPermission(assignPermissionDto);
 	}
+
+	
 }

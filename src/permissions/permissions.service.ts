@@ -7,6 +7,7 @@ import { RolesService } from 'src/roles/roles.service';
 import { createPermissionDto } from './dto/create-permission.dto';
 import { InternalServerErrorException } from 'src/common/exceptions';
 import { UsersService } from 'src/users/users.service';
+import { PermissionEnum } from 'src/common/enums/permission.enum';
 
 @Injectable()
 export class PermissionsService {
@@ -16,6 +17,31 @@ export class PermissionsService {
 		private readonly roleService: RolesService,
 		private readonly userService: UsersService,
 	) {}
+
+	async seedPermissions() {
+		const permissions = [
+			{ name: PermissionEnum.READ_USERS, description: 'Read Users' },
+			{ name: PermissionEnum.CREATE_USERS, description: 'Create Users' },
+			{ name: PermissionEnum.UPDATE_USERS, description: 'Update Users' },
+			{ name: PermissionEnum.DELETE_USERS, description: 'Delete Users' },
+			{ name: PermissionEnum.READ_ROLES, description: 'Read Roles' },
+			{ name: PermissionEnum.CREATE_ROLES, description: 'Create Roles' },
+			{ name: PermissionEnum.UPDATE_ROLES, description: 'Update Roles' },
+			{ name: PermissionEnum.DELETE_ROLES, description: 'Delete Roles' },
+			{ name: PermissionEnum.READ_PERMISSIONS, description: 'Read Permissions' },
+			{ name: PermissionEnum.CREATE_PERMISSIONS, description: 'Create Permissions' },
+			{ name: PermissionEnum.UPDATE_PERMISSIONS, description: 'Update Permissions' },
+			{ name: PermissionEnum.DELETE_PERMISSIONS, description: 'Delete Permissions' },
+			{ name: PermissionEnum.ASSIGN_PERMISSIONS, description: 'Assign Permissions' },
+			{ name: PermissionEnum.ASSIGN_ROLES, description: 'Assign Roles' }
+		];
+	
+		for (const permissionData of permissions) {
+			const permission = this.permissionRepository.create(permissionData);
+			await this.permissionRepository.save(permission);
+		}
+	}
+	
 	async create(createPermissionDto: createPermissionDto) {
 		const permission = this.permissionRepository.create(createPermissionDto);
 		return await this.permissionRepository.save(permission);
