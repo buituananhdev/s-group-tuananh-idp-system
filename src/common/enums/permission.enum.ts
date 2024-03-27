@@ -12,5 +12,6 @@ export enum PermissionEnum {
     UPDATE_PERMISSIONS = 'update:permissions',
     DELETE_PERMISSIONS = 'delete:permissions',
     ASSIGN_PERMISSIONS = 'assign:permissions',
-    ASSIGN_ROLES = 'assign:roles'
+    ASSIGN_ROLES = 'assign:roles',
+    SEED_DATA = 'seed:data',
 }

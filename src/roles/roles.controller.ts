@@ -22,8 +22,8 @@ export class RolesController {
     return this.rolesService.seedRoles();
   }
 
-  @Identified
-	@Permission([PermissionEnum.CREATE_ROLES])
+  // @Identified
+	// @Permission([PermissionEnum.CREATE_ROLES])
   @Post()
   create(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.create(createRoleDto);
@@ -33,33 +33,31 @@ export class RolesController {
 	// @Permission([PermissionEnum.READ_ROLES])
   
 
-  @Identified
-	@Permission([PermissionEnum.READ_ROLES])
+  // @Identified
+	// @Permission([PermissionEnum.READ_ROLES])
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.rolesService.findOne({ where: { id } });
   }
 
-  @Identified
-	@Permission([PermissionEnum.UPDATE_ROLES])
+  // @Identified
+	// @Permission([PermissionEnum.UPDATE_ROLES])
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
     return this.rolesService.update(+id, updateRoleDto);
   }
 
-  @Identified
-	@Permission([PermissionEnum.DELETE_ROLES])
+  // @Identified
+	// @Permission([PermissionEnum.DELETE_ROLES])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.rolesService.remove(+id);
   }
 
-  @Identified
-	@Permission([PermissionEnum.ASSIGN_ROLES])
+  // @Identified
+	// @Permission([PermissionEnum.ASSIGN_ROLES])
   @Post('assign')
   assignRole(@Body() assignRoleDto: AssignRoleDto) {
     return this.rolesService.assignRole(assignRoleDto);
   }
-
-  
 }

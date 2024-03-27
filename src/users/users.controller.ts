@@ -15,13 +15,15 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Identified, Permission } from 'src/common/decorators/index';
 import { PermissionEnum } from 'src/common/enums/index';
-import { AuthUser } from 'src/common/decorators/user.decorator';
+import { CurrentUser } from 'src/common/decorators/user.decorator';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
 	constructor(private readonly usersService: UsersService) {}
 
+	@Identified
+	@Permission([PermissionEnum.SEED_DATA])
 	@Get('seed')
 	seedUsers() {
 		return this.usersService.seedUsers();
@@ -29,19 +31,19 @@ export class UsersController {
 	
 	@Identified
 	@Get('me')
-	getMe(@Headers('Authorization') auth: string) {
-		return this.usersService.getMe(auth);
+	getMe(@CurrentUser() auth: any) {
+		return this.usersService.getMe(auth.id);
 	}
 
-	// @Identified
-	// @Permission([PermissionEnum.CREATE_USERS])
+	@Identified
+	@Permission([PermissionEnum.CREATE_USERS])
 	@Post()
 	create(@Body() createUserDto: CreateUserDto) {
 		return this.usersService.create(createUserDto);
 	}
 
-	// @Identified
-	// @Permission([PermissionEnum.READ_USERS])
+	@Identified
+	@Permission([PermissionEnum.READ_USERS])
 	@Get()
 	findAll(
 		@Query('page') page: number = 1,
