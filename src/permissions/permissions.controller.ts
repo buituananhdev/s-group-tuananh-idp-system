@@ -9,7 +9,7 @@ import {
 import { PermissionsService } from './permissions.service';
 import { ApiTags } from '@nestjs/swagger';
 import { AssignPermissionDto } from './dto/assign-permission.dto';
-import { createPermissionDto } from './dto/create-permission.dto';
+import { CreatePermissionDto } from './dto/create-permission.dto';
 import { Identified, Permission } from 'src/common/decorators/index';
 import { PermissionEnum } from 'src/common/enums/index';
 
@@ -26,8 +26,8 @@ export class PermissionsController {
 	@Identified
 	@Permission([PermissionEnum.CREATE_PERMISSIONS])
 	@Post()
-	create(@Body() createPermissionDto: createPermissionDto) {
-		return this.permissionsService.create(createPermissionDto);
+	create(@Body() CreatePermissionDto: CreatePermissionDto) {
+		return this.permissionsService.create(CreatePermissionDto);
 	}
 
 	@Identified

@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AssignPermissionDto } from './dto/assign-permission.dto';
 import { RolesService } from 'src/roles/roles.service';
-import { createPermissionDto } from './dto/create-permission.dto';
+import { CreatePermissionDto } from './dto/create-permission.dto';
 import { InternalServerErrorException } from 'src/common/exceptions';
 import { UsersService } from 'src/users/users.service';
 import { PermissionEnum } from 'src/common/enums/permission.enum';
@@ -42,8 +42,8 @@ export class PermissionsService {
 		}
 	}
 	
-	async create(createPermissionDto: createPermissionDto) {
-		const permission = this.permissionRepository.create(createPermissionDto);
+	async create(CreatePermissionDto: CreatePermissionDto) {
+		const permission = this.permissionRepository.create(CreatePermissionDto);
 		return await this.permissionRepository.save(permission);
 	}
 

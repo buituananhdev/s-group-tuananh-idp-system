@@ -9,20 +9,18 @@ import { Role } from 'src/roles/entities/role.entity';
 import { ConfigService } from '@nestjs/config';
 import { Meta } from 'src/common/types/index';
 import {
-	UserAlreadyExistsException,
 	UserNotFoundException,
 	InternalServerErrorException,
 } from 'src/common/exceptions/index';
 import { JwtService } from '@nestjs/jwt';
 import { faker } from '@faker-js/faker';
+import { SystemRoles } from 'src/common/enums/role.enum';
 
 @Injectable()
 export class UsersService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
-		private readonly configService: ConfigService,
-		private readonly jwtService: JwtService,
 	) {}
 
 	async seedUsers() {
@@ -99,8 +97,31 @@ export class UsersService {
 		fromDate?: Date,
 		toDate?: Date,
 	): Promise<{ data: User[]; meta: Meta }> {
-
-		const queryBuilder = this.userRepository.createQueryBuilder('user');
+		const queryBuilder = this.userRepository
+			.createQueryBuilder('user')
+			.select(['user.id', 'user.username', 'user.email', 'user.fullname', 'user.createdAt', 'user.updatedAt']);
+		// Thêm validation cho các tham số đầu vào bằng pipe
+		if (!Number.isInteger(page) || page <= 0) {
+			throw new BadRequestException('Invalid page number');
+		}
+		if (!Number.isInteger(limit) || limit <= 0) {
+			throw new BadRequestException('Invalid limit value');
+		}
+		if (search && typeof search !== 'string') {
+			throw new BadRequestException('Invalid search parameter');
+		}
+		if (name && typeof name !== 'string') {
+			throw new BadRequestException('Invalid name parameter');
+		}
+		if (email && typeof email !== 'string') {
+			throw new BadRequestException('Invalid email parameter');
+		}
+		if (fromDate && !(fromDate instanceof Date)) {
+			throw new BadRequestException('Invalid fromDate parameter');
+		}
+		if (toDate && !(toDate instanceof Date)) {
+			throw new BadRequestException('Invalid toDate parameter');
+		}
 
 		if (search) {
 			queryBuilder.andWhere(
@@ -123,6 +144,10 @@ export class UsersService {
 				toDate,
 			});
 		}
+
+		queryBuilder.leftJoinAndSelect('user.roles', 'roles');
+		queryBuilder.leftJoinAndSelect('roles.permissions', 'permissions');
+		queryBuilder.andWhere('roles.name != :adminRoleName', { adminRoleName: SystemRoles.SUPER_ADMIN });
 
 		const [data, total] = await queryBuilder
 			.skip((page - 1) * limit)
@@ -207,13 +232,12 @@ export class UsersService {
 		}
 	}
 
-	async getMe(token: string): Promise<User> {
-		const decoded = await this.jwtService.verifyAsync(
-			token.replace('Bearer ', ''),
-		);
+	async getMe(userId: string): Promise<any> {
 		const user = await this.userRepository.findOneOrFail({
-			where: { id: decoded.id },
+			where: { id: parseInt(userId) },
 		});
-		return user;
+		const { password, ...userWithoutPassword } = user;
+		const roles = user.roles.map((role) => role.name);
+		return { ...userWithoutPassword, roles };
 	}
 }
