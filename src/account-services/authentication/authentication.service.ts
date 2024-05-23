@@ -7,6 +7,7 @@ import { AuthPayload } from './interfaces/auth-payload.interface';
 import { PermissionsService } from 'src/permissions/permissions.service';
 import { User } from 'src/users/entities/user.entity';
 import { Cache } from 'cache-manager';
+import { de } from '@faker-js/faker';
 
 @Injectable()
 export class AuthenticationService {
@@ -31,6 +32,25 @@ export class AuthenticationService {
 		}
 		
 		return this.jwtService.sign(payload);
+	}
+
+	async loginOAuth2(loginDto: LoginDto): Promise<any> {
+		const user = await this.validateUser(loginDto.username, loginDto.password);
+		const payload: AuthPayload = { 
+			name: user.fullname,
+			id: user.id
+		};
+
+		if(!await this.cacheManager.get(user.id.toString())) {
+			const userPermissions = await this.permissionsService.getPermissionByUserId(user.id);
+			await this.cacheManager.set(user.id.toString(), userPermissions.toString());
+			console.log(await this.cacheManager.get(user.id.toString()))
+		}
+		delete user.password;
+		return {
+			token: this.jwtService.sign(payload),
+			user: user
+		};
 	}
 
 	async validateUser(username: string, password: string): Promise<User> {
