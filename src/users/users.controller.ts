@@ -42,8 +42,8 @@ export class UsersController {
 		return this.usersService.create(createUserDto);
 	}
 
-	@Identified
-	@Permission([PermissionEnum.READ_USERS])
+	// @Identified
+	// @Permission([PermissionEnum.READ_USERS])
 	@Get()
 	findAll(
 		@Query('page') page: number = 1,
